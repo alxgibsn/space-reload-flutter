@@ -10,7 +10,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: RefreshControlDemo(demos['space']),
+      home: RefreshControlDemo(demos['zombie']),
       debugShowCheckedModeBanner: false,
     );
   }
@@ -40,5 +40,13 @@ final Map<String, Demo> demos = {
     navColor: Color(0xFF040404),
     backgroundColor: Color(0xFF040404),
     tileColor: Color(0xFF201F22)
+  ),
+  'zombie': Demo(
+    riveFile: 'zombie',
+    alignment: Alignment.center,
+    navTitle: 'ZombieRun',
+    navColor: Color(0xFF342472),
+    backgroundColor: Color(0xFF342472),
+    tileColor: Color(0xFF4A3F8A)
   ),
 };
