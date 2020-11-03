@@ -75,8 +75,10 @@ class RefreshController extends RiveAnimationController<RuntimeArtboard> {
   void scrollDidEnd() {
     if (pulledExtent != null && refreshTriggerPullDistance != null) {
       if (pulledExtent < refreshTriggerPullDistance) {
-        _triggerAnimation.time = 0;
-        _loadingAnimation.time = 0;
+        final triggerStartFrame = (_triggerAnimation.animation.enableWorkArea ? _triggerAnimation.animation.workStart : 0);
+        _triggerAnimation.time = triggerStartFrame.toDouble() / _triggerAnimation.animation.fps;
+        final loadingStartFrame = (_loadingAnimation.animation.enableWorkArea ? _loadingAnimation.animation.workStart : 0);
+        _loadingAnimation.time = loadingStartFrame.toDouble() / _loadingAnimation.animation.fps;
         _loadingAnimation.animation.apply(_loadingAnimation.time, coreContext: _artboard);
         _triggerAnimation.animation.apply(_triggerAnimation.time, coreContext: _artboard);
         _pullAnimation.animation.apply(0, coreContext: _artboard);
