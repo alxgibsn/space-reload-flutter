@@ -15,6 +15,7 @@ class RefreshController extends RiveAnimationController<RuntimeArtboard> {
 
   RuntimeArtboard _artboard;
   bool isRefreshing = false;
+  bool completedPull = false;
 
   @override
   bool init(RuntimeArtboard artboard) {
@@ -53,7 +54,12 @@ class RefreshController extends RiveAnimationController<RuntimeArtboard> {
     // Pull animation
     double animationPosition = pulledExtent / refreshTriggerPullDistance;
     // animationPosition *= animationPosition;
-    if (!isRefreshing) {
+    
+    if (!completedPull && _pullAnimation.time >= _pullAnimation.animation.duration  / _pullAnimation.animation.fps) {
+      completedPull = true;
+    }
+
+    if (!isRefreshing || !completedPull) {
       _pullAnimation.animation.apply(_pullAnimation.time * animationPosition, coreContext: artboard);
       _pullAnimation.advance(elapsedSeconds);
     }
