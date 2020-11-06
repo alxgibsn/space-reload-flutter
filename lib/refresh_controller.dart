@@ -89,6 +89,7 @@ class RefreshController extends RiveAnimationController<RuntimeArtboard> {
         _triggerAnimation.animation.apply(_triggerAnimation.time, coreContext: _artboard);
         _pullAnimation.animation.apply(0, coreContext: _artboard);
         isRefreshing = false;
+        completedPull = false;
       }
     }
   }
