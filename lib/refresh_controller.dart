@@ -3,31 +3,39 @@ import 'package:rive/rive.dart';
 
 class RefreshController extends RiveAnimationController<RuntimeArtboard> {
 
-  LinearAnimationInstance _idleAnimation;
-  LinearAnimationInstance _pullAnimation;
-  LinearAnimationInstance _triggerAnimation;
-  LinearAnimationInstance _loadingAnimation;
+  RuntimeArtboard _artboard;
 
+  /// Our four different animations
+  LinearAnimationInstance _idle;
+  LinearAnimationInstance _pull;
+  LinearAnimationInstance _trigger;
+  LinearAnimationInstance _loading;
+
+  /// Values from CupertinoSliverRefreshControl builder function
   RefreshIndicatorMode refreshState;
   double pulledExtent;
-  double refreshTriggerPullDistance;
+  double triggerThreshold;
   double refreshIndicatorExtent;
 
-  RuntimeArtboard _artboard;
-  bool isRefreshing = false;
-  bool completedPull = false;
+  double get _pullPos {
+    return pulledExtent / triggerThreshold;
+  }
 
   @override
   bool init(RuntimeArtboard artboard) {
 
     _artboard = artboard;
-    _idleAnimation = getInstance(artboard, animationName: 'Idle');
-    _pullAnimation = getInstance(artboard, animationName: 'Pull');
-    _triggerAnimation = getInstance(artboard, animationName: 'Trigger');
-    _loadingAnimation = getInstance(artboard, animationName: 'Loading');
+    _idle = getInstance(artboard, animationName: 'Idle');
+    _pull = getInstance(artboard, animationName: 'Pull');
+    _trigger = getInstance(artboard, animationName: 'Trigger');
+    _loading = getInstance(artboard, animationName: 'Loading');
+
+    _pull.time = _pull.animation.enableWorkArea
+      ? _pull.animation.workEnd / _pull.animation.fps
+      : _pull.animation.duration / _pull.animation.fps;
 
     isActive = true;
-    return _idleAnimation != null;
+    return _idle != null;
   }
 
   LinearAnimationInstance getInstance(RuntimeArtboard artboard, { String animationName }) {
@@ -46,55 +54,46 @@ class RefreshController extends RiveAnimationController<RuntimeArtboard> {
   void apply(RuntimeArtboard artboard, double elapsedSeconds) {
 
     // Idle animation
-    _idleAnimation.animation.apply(_idleAnimation.time, coreContext: artboard);
-    if (!_idleAnimation.advance(elapsedSeconds)) {
-      isActive = false;
-    }
+    _idle.animation.apply(_idle.time, coreContext: artboard);
+    _idle.advance(elapsedSeconds);
 
     // Pull animation
-    double animationPosition = pulledExtent / refreshTriggerPullDistance;
-    // animationPosition *= animationPosition;
-    
-    if (!completedPull && _pullAnimation.time >= _pullAnimation.animation.duration  / _pullAnimation.animation.fps) {
-      completedPull = true;
-    }
-
-    if (!isRefreshing || !completedPull) {
-      _pullAnimation.animation.apply(_pullAnimation.time * animationPosition, coreContext: artboard);
-      _pullAnimation.advance(elapsedSeconds);
+    if (_trigger.time == 0) {
+      _pull.animation.apply(_pull.time * _pullPos, coreContext: artboard);
     }
 
     // Trigger animation
     if (refreshState == RefreshIndicatorMode.refresh ||
         refreshState == RefreshIndicatorMode.armed) {      
-      _triggerAnimation.animation.apply(_triggerAnimation.time, coreContext: artboard);
-      _triggerAnimation.advance(elapsedSeconds);
+      _trigger.animation.apply(_trigger.time, coreContext: artboard);
+      _trigger.advance(elapsedSeconds);
       
       // Loading animation
-      if (_triggerAnimation.time >= _triggerAnimation.animation.workEnd / _triggerAnimation.animation.fps) {
-        _loadingAnimation.animation.apply(_loadingAnimation.time, coreContext: artboard);
-        _loadingAnimation.advance(elapsedSeconds);
+      if (_trigger.time >= _trigger.animation.workEnd / _trigger.animation.fps) {
+        _loading.animation.apply(_loading.time, coreContext: artboard);
+        _loading.advance(elapsedSeconds);
       }
     }
   }
 
-  void scrollDidEnd() {
-    if (pulledExtent != null && refreshTriggerPullDistance != null) {
-      if (pulledExtent < refreshTriggerPullDistance) {
-        final triggerStartFrame = (_triggerAnimation.animation.enableWorkArea ? _triggerAnimation.animation.workStart : 0);
-        _triggerAnimation.time = triggerStartFrame.toDouble() / _triggerAnimation.animation.fps;
-        final loadingStartFrame = (_loadingAnimation.animation.enableWorkArea ? _loadingAnimation.animation.workStart : 0);
-        _loadingAnimation.time = loadingStartFrame.toDouble() / _loadingAnimation.animation.fps;
-        _loadingAnimation.animation.apply(_loadingAnimation.time, coreContext: _artboard);
-        _triggerAnimation.animation.apply(_triggerAnimation.time, coreContext: _artboard);
-        _pullAnimation.animation.apply(0, coreContext: _artboard);
-        isRefreshing = false;
-        completedPull = false;
+  void reset() {
+    if (pulledExtent != null && triggerThreshold != null) {
+      if (pulledExtent < triggerThreshold) {
+
+        final triggerStartFrame = _trigger.animation.enableWorkArea ? _trigger.animation.workStart : 0;
+        _trigger.time = triggerStartFrame.toDouble() / _trigger.animation.fps;
+
+        final loadingStartFrame = _loading.animation.enableWorkArea ? _loading.animation.workStart : 0;
+        _loading.time = loadingStartFrame.toDouble() / _loading.animation.fps;
+        
+        _loading.animation.apply(_loading.time, coreContext: _artboard);
+        _trigger.animation.apply(_trigger.time, coreContext: _artboard);
+        _pull.animation.apply(0, coreContext: _artboard);
       }
     }
   }
 
-  @override
+  @override 
   void dispose() {}
 
   @override

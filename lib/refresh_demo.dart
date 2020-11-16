@@ -8,7 +8,6 @@ import 'package:space_reload_flutter/refresh_controller.dart';
 class RefreshControlDemo extends StatefulWidget {
 
   final Demo demo;
-
   const RefreshControlDemo(this.demo, {Key key}) : super(key: key);
 
   @override
@@ -47,7 +46,7 @@ class _RefreshControlDemoState extends State<RefreshControlDemo> {
 
     _controller.refreshState = refreshState;
     _controller.pulledExtent = pulledExtent;
-    _controller.refreshTriggerPullDistance = refreshTriggerPullDistance;
+    _controller.triggerThreshold = refreshTriggerPullDistance;
     _controller.refreshIndicatorExtent = refreshIndicatorExtent;
 
     return _artboard != null
@@ -63,13 +62,12 @@ class _RefreshControlDemoState extends State<RefreshControlDemo> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.demo.navTitle),
-        // brightness: Brightness.light,
         backgroundColor: widget.demo.navColor),
       backgroundColor: widget.demo.backgroundColor,
       body: NotificationListener<ScrollNotification>(
         onNotification: (notification) {
           if (notification is ScrollEndNotification) {
-            _controller.scrollDidEnd();
+            _controller.reset();
           }
           return true;
         },
@@ -80,7 +78,6 @@ class _RefreshControlDemoState extends State<RefreshControlDemo> {
               refreshIndicatorExtent: 240.0,
               builder: buildRefreshWidget,
               onRefresh: () {
-                _controller.isRefreshing = true;
                 return Future<void>.delayed(const Duration(seconds: 5))
                   ..then<void>((_) {
                     if (mounted) {

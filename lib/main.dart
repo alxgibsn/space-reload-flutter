@@ -10,7 +10,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: RefreshControlDemo(demos['space']),
+      home: RefreshControlDemo(demos['rocket']),
       debugShowCheckedModeBanner: false,
     );
   }
