@@ -27,7 +27,6 @@ class _RefreshControlDemoState extends State<RefreshControlDemo> {
 
   /// Loads a Rive file
   void _loadRiveFile() async {
-    // final bytes = await rootBundle.load('assets/space_reload.riv');
     final bytes = await rootBundle.load('assets/${widget.demo.riveFile}.riv');
     final file = RiveFile();
     if (file.import(bytes)) {
