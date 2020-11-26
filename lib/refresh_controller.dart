@@ -25,10 +25,10 @@ class RefreshController extends RiveAnimationController<RuntimeArtboard> {
   bool init(RuntimeArtboard artboard) {
 
     _artboard = artboard;
-    _idle = getInstance(artboard, animationName: 'Idle');
-    _pull = getInstance(artboard, animationName: 'Pull');
-    _trigger = getInstance(artboard, animationName: 'Trigger');
-    _loading = getInstance(artboard, animationName: 'Loading');
+    _idle = artboard.animationByName('Idle');
+    _pull = artboard.animationByName('Pull');
+    _trigger = artboard.animationByName('Trigger');
+    _loading = artboard.animationByName('Loading');
 
     _pull.time = _pull.animation.enableWorkArea
       ? _pull.animation.workEnd / _pull.animation.fps
@@ -36,18 +36,6 @@ class RefreshController extends RiveAnimationController<RuntimeArtboard> {
 
     isActive = true;
     return _idle != null;
-  }
-
-  LinearAnimationInstance getInstance(RuntimeArtboard artboard, { String animationName }) {
-    var animation = artboard.animations.firstWhere(
-      (animation) =>
-          animation is LinearAnimation && animation.name == animationName,
-      orElse: () => null,
-    );
-    if (animation != null) {
-      return LinearAnimationInstance(animation as LinearAnimation);
-    }
-    return null;
   }
 
   @override
